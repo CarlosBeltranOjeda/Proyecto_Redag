@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Torneos - REDAG{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+  <h2 style="color:var(--am)">Torneos ({{torneos|length}})</h2>
+  <a href="/torneos/nuevo" class="btn btn-warning">+ Nuevo Torneo</a>
+</div>
+
+{% if torneos %}
+{% for t in torneos %}
+<div class="panel" style="margin-bottom:12px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+    <div style="flex:1">
+      <div style="font-weight:700;font-size:1rem;color:var(--text)">{{t.nombre}}</div>
+      <div style="font-size:.8rem;color:var(--dim);margin-top:4px">
+        {% if t.fecha_inicio %}{{t.fecha_inicio}}{% if t.fecha_fin %} al {{t.fecha_fin}}{% endif %}{% endif %}
+        {% if t.sede %} &bull; {{t.sede}}{% endif %}
+      </div>
+      <span class="badge {% if t.estado=='En curso' %}badge-verde{% elif t.estado=='Finalizado' %}badge-az{% elif t.estado=='Cancelado' %}badge-rojo{% else %}badge-am{% endif %}" style="margin-top:6px">
+        {{t.estado}}
+      </span>
+    </div>
+    <div class="btn-group">
+      <a href="/torneos/{{t.id}}/jugadores" class="btn btn-primary btn-sm">Jugadores</a>
+      <a href="/torneos/editar/{{t.id}}" class="btn btn-gray btn-sm">Editar</a>
+      <form method="post" action="/torneos/eliminar/{{t.id}}"
+            onsubmit="return confirm('Eliminar torneo {{t.nombre}}?')">
+        <button class="btn btn-danger btn-sm">X</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="panel" style="text-align:center;padding:40px">
+  <p style="color:var(--dim)">No hay torneos registrados</p>
+  <a href="/torneos/nuevo" class="btn btn-warning" style="margin-top:12px">Crear primer torneo</a>
+</div>
+{% endif %}
+{% endblock %}

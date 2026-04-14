@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}{{titulo}} - REDAG{% endblock %}
+{% block content %}
+<div style="max-width:520px;margin:0 auto">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+    <a href="/jugadores" class="btn btn-gray btn-sm">&#8592;</a>
+    <h2 style="color:var(--am)">{{titulo}}</h2>
+  </div>
+
+  <div class="panel">
+    <form method="post" enctype="multipart/form-data">
+
+      {% if jugador and jugador.foto_url %}
+      <div style="text-align:center;margin-bottom:16px">
+        <img src="{{jugador.foto_url}}" class="foto-preview">
+      </div>
+      {% endif %}
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input name="nombres" required value="{{jugador.nombres if jugador else ''}}">
+        </div>
+        <div class="form-group">
+          <label>Apellidos *</label>
+          <input name="apellidos" required value="{{jugador.apellidos if jugador else ''}}">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Edad *</label>
+          <input name="edad" type="number" min="1" max="99" required
+                 value="{{jugador.edad if jugador else ''}}">
+        </div>
+        <div class="form-group">
+          <label>Carnet de Identidad</label>
+          <input name="ci" placeholder="ej: 12345678" value="{{jugador.ci if jugador else ''}}">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categoria *</label>
+          <select name="categoria" required>
+            {% for c in categorias %}
+            <option value="{{c}}" {% if jugador and jugador.categoria==c %}selected{% endif %}>{{c}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select name="estado">
+            <option value="Nuevo" {% if not jugador or jugador.estado=='Nuevo' %}selected{% endif %}>Nuevo</option>
+            <option value="Antiguo" {% if jugador and jugador.estado=='Antiguo' %}selected{% endif %}>Antiguo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Celular / WhatsApp</label>
+          <input name="celular" placeholder="ej: 75000000" value="{{jugador.celular if jugador else ''}}">
+        </div>
+        <div class="form-group">
+          <label>Sede</label>
+          <select name="sede_id">
+            {% for s in sedes %}
+            <option value="{{s.id}}" {% if jugador and jugador.sede_id==s.id %}selected{% endif %}>{{s.nombre}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>URL de Foto (opcional)</label>
+        <input name="foto_url" placeholder="https://..." value="{{jugador.foto_url if jugador else ''}}">
+        <small style="color:var(--dim);font-size:.75rem">
+          Sube la foto a imgbb.com o similar y pega el enlace aqui
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <a href="/jugadores" class="btn btn-gray">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          {% if jugador %}Guardar Cambios{% else %}Registrar Jugador{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

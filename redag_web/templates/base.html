@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#003399">
+<link rel="manifest" href="/static/manifest.json">
+<title>{% block title %}Sistema REDAG{% endblock %}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --az:#003399;--az2:#0044cc;--am:#FFD700;--am2:#d4a017;
+  --bg:#1e2128;--panel:#252930;--card:#2d3139;
+  --text:#e2e4e9;--dim:#8b909a;
+  --verde:#27ae60;--rojo:#c0392b;--naranja:#e67e22;
+  --borde:#3a3f4a;
+}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* HEADER */
+.header{background:var(--az);padding:0 16px;display:flex;align-items:center;
+        height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.header-logo{width:38px;height:38px;border-radius:50%;margin-right:10px;object-fit:cover}
+.header-title{font-size:1.1rem;font-weight:700;color:var(--am);flex:1}
+.header-sub{font-size:.7rem;color:#aab4c8}
+.menu-toggle{background:none;border:none;color:var(--am);font-size:1.5rem;cursor:pointer;padding:4px 8px;display:none}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:56px;left:0;width:220px;height:calc(100vh - 56px);
+         background:var(--panel);padding:12px 0;overflow-y:auto;transition:.3s;z-index:99;
+         border-right:1px solid var(--borde)}
+.sidebar a{display:flex;align-items:center;gap:10px;padding:11px 18px;color:var(--dim);
+           text-decoration:none;font-size:.92rem;transition:.2s}
+.sidebar a:hover,.sidebar a.active{color:var(--am);background:#1e2a3d}
+.sidebar a .icon{font-size:1.1rem;width:20px;text-align:center}
+.sidebar .sep{border-top:1px solid var(--borde);margin:8px 0}
+
+/* MAIN */
+.main{margin-left:220px;padding:20px;min-height:calc(100vh - 56px)}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border-radius:10px;padding:16px;text-align:center;
+           border:1px solid var(--borde);transition:.2s}
+.stat-card:hover{border-color:var(--am2);transform:translateY(-2px)}
+.stat-card .val{font-size:2rem;font-weight:700;color:var(--am)}
+.stat-card .lbl{font-size:.75rem;color:var(--dim);margin-top:4px}
+
+/* PANEL */
+.panel{background:var(--card);border-radius:10px;padding:16px;margin-bottom:16px;
+       border:1px solid var(--borde)}
+.panel-title{font-size:.9rem;font-weight:700;color:var(--am2);margin-bottom:12px;
+             display:flex;align-items:center;gap:8px}
+
+/* TABLA */
+.tabla-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:#1e2a3d;color:var(--am2);padding:10px 8px;text-align:center;font-weight:600}
+td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--borde)}
+tr:nth-child(even) td{background:#2a2f38}
+tr:hover td{background:#2e3440}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:600}
+.badge-verde{background:#1a4d2e;color:#2ecc71}
+.badge-rojo{background:#4d1a1a;color:#e74c3c}
+.badge-am{background:#4d3d00;color:#FFD700}
+.badge-az{background:#1a2a5e;color:#5b9bf8}
+
+/* BOTONES */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:7px;
+     border:none;cursor:pointer;font-size:.85rem;font-weight:600;text-decoration:none;transition:.2s}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-primary{background:var(--az2);color:#fff}
+.btn-success{background:var(--verde);color:#111}
+.btn-warning{background:var(--naranja);color:#111}
+.btn-danger{background:var(--rojo);color:#fff}
+.btn-purple{background:#6c3483;color:#fff}
+.btn-gray{background:#3a3f4a;color:var(--text)}
+.btn-sm{padding:5px 10px;font-size:.78rem}
+.btn-group{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+
+/* FORM */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:.82rem;font-weight:600;color:var(--dim);margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:10px 12px;background:#1e2128;border:1px solid var(--borde);
+  border-radius:7px;color:var(--text);font-size:.9rem;outline:none;transition:.2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{
+  border-color:var(--az2);box-shadow:0 0 0 2px rgba(26,76,196,.25)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* SEARCH BAR */
+.search-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.search-bar input,.search-bar select{flex:1;min-width:160px;padding:9px 12px;
+  background:var(--card);border:1px solid var(--borde);border-radius:7px;
+  color:var(--text);font-size:.88rem;outline:none}
+.search-bar input:focus,.search-bar select:focus{border-color:var(--az2)}
+
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:14px;font-size:.88rem}
+.alert-warning{background:#4d3d00;border:1px solid var(--am2);color:var(--am)}
+.alert-info{background:#1a2a5e;border:1px solid var(--az2);color:#8bb4f8}
+
+/* JUGADOR CARD */
+.jug-card{background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--borde);
+          display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.jug-avatar{width:44px;height:44px;border-radius:50%;background:var(--az);
+            display:flex;align-items:center;justify-content:center;
+            font-weight:700;font-size:1rem;color:var(--am);flex-shrink:0}
+.jug-avatar img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.jug-info{flex:1;min-width:0}
+.jug-name{font-weight:700;font-size:.95rem;color:var(--text)}
+.jug-meta{font-size:.78rem;color:var(--dim);margin-top:2px}
+.jug-actions{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap}
+
+/* MOBILE */
+@media(max-width:768px){
+  .menu-toggle{display:block}
+  .sidebar{left:-220px}.sidebar.open{left:0}
+  .main{margin-left:0;padding:12px}
+  .form-row{grid-template-columns:1fr}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  table{font-size:.78rem}
+  th,td{padding:7px 5px}
+  .btn-group{justify-content:flex-start}
+}
+
+/* MODALES */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+               display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border-radius:12px;width:100%;max-width:480px;
+       border:1px solid var(--borde);overflow:hidden}
+.modal-header{background:var(--az);padding:14px 16px;display:flex;
+              align-items:center;justify-content:space-between}
+.modal-header h3{color:var(--am);font-size:1rem}
+.modal-close{background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer}
+.modal-body{padding:18px}
+.modal-footer{padding:12px 18px;display:flex;gap:8px;justify-content:flex-end;
+              border-top:1px solid var(--borde)}
+
+/* PENDIENTE chip */
+.chip-pend{background:#4d1a1a;color:#ff8080;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
+.chip-pag{background:#1a4d2e;color:#2ecc71;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
+
+/* FOTO UPLOAD */
+.foto-preview{width:80px;height:80px;border-radius:50%;object-fit:cover;
+              border:3px solid var(--am);margin-bottom:8px}
+.foto-upload-area{text-align:center;padding:16px;border:2px dashed var(--borde);
+                  border-radius:10px;cursor:pointer;transition:.2s}
+.foto-upload-area:hover{border-color:var(--am2)}
+
+/* WA button */
+.btn-wa{background:#25d366;color:#111;display:inline-flex;align-items:center;gap:6px}
+.btn-wa:hover{background:#1da851}
+
+/* Inscrito badge */
+.inscrito-tag{background:#1e3a8a;color:#93c5fd;padding:2px 8px;
+              border-radius:10px;font-size:.72rem;font-weight:600}
+</style>
+</head>
+<body>
+<!-- Header -->
+<header class="header">
+  <button class="menu-toggle" onclick="toggleMenu()">&#9776;</button>
+  <img src="/static/logo.jpg" class="header-logo" onerror="this.style.display='none'">
+  <div>
+    <div class="header-title">PROYECTO REDAG</div>
+    <div class="header-sub">Sistema de Gestion</div>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <a href="/dashboard" class="{% if request.path=='/dashboard' %}active{% endif %}">
+    <span class="icon">&#128200;</span> Dashboard
+  </a>
+  <a href="/jugadores" class="{% if '/jugadores' in request.path %}active{% endif %}">
+    <span class="icon">&#128101;</span> Jugadores
+  </a>
+  <a href="/pagos" class="{% if '/pagos' in request.path %}active{% endif %}">
+    <span class="icon">&#128176;</span> Pagos
+  </a>
+  <div class="sep"></div>
+  <a href="/torneos" class="{% if '/torneos' in request.path %}active{% endif %}">
+    <span class="icon">&#127942;</span> Torneos
+  </a>
+  <div class="sep"></div>
+  <a href="/setup" target="_blank">
+    <span class="icon">&#9881;</span> Setup BD
+  </a>
+</nav>
+
+<!-- Main -->
+<main class="main">
+  {% block content %}{% endblock %}
+</main>
+
+<script>
+function toggleMenu(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  var s=document.getElementById('sidebar');
+  var t=document.querySelector('.menu-toggle');
+  if(window.innerWidth<=768 && !s.contains(e.target) && e.target!==t){
+    s.classList.remove('open');
+  }
+});
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+// PWA
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/static/sw.js').catch(()=>{});
+}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

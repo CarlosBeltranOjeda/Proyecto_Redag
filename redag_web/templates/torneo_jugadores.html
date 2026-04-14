@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Jugadores - {{torneo.nombre}}{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+  <a href="/torneos" class="btn btn-gray btn-sm">&#8592;</a>
+  <h2 style="color:var(--am)">{{torneo.nombre}}</h2>
+  <span class="badge badge-az">{{torneo.estado}}</span>
+</div>
+<p style="color:var(--dim);font-size:.82rem;margin-bottom:16px">
+  Gestion de jugadores seleccionados para el torneo
+</p>
+
+<!-- TABS -->
+<div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap">
+  <button onclick="showTab('inscritos')" id="tab-inscritos"
+          class="btn btn-primary btn-sm" style="border-radius:20px">
+    Inscritos ({{inscritos|length}})
+  </button>
+  <button onclick="showTab('buscar')" id="tab-buscar"
+          class="btn btn-gray btn-sm" style="border-radius:20px">
+    + Inscribir Jugador
+  </button>
+  {% set cats_con_inscritos = inscritos | map(attribute='categoria_torneo') | unique | list %}
+  {% for c in cats_con_inscritos %}
+  <a href="/torneos/{{torneo.id}}/categoria/{{c}}/lista/pdf"
+     class="btn btn-purple btn-sm" style="border-radius:20px" title="Descargar lista PDF de {{c}}">
+    PDF {{c}}
+  </a>
+  {% endfor %}
+</div>
+
+<!-- TAB: INSCRITOS -->
+<div id="tab-inscritos-content">
+  {% if inscritos %}
+    <!-- Agrupar por categoria -->
+    {% set cats = inscritos | map(attribute='categoria_torneo') | unique | sort | list %}
+    {% for cat in cats %}
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-title">
+        &#127942; {{cat}}
+        <span style="color:var(--dim);font-size:.8rem;font-weight:400">
+          — {{inscritos | selectattr('categoria_torneo','equalto',cat) | list | length}} jugadores
+        </span>
+        <a href="/torneos/{{torneo.id}}/categoria/{{cat}}/lista/pdf"
+           class="btn btn-purple btn-sm" style="margin-left:auto">
+           &#128247; Imprimir lista
+        </a>
+      </div>
+      {% for ins in inscritos %}
+      {% if ins.categoria_torneo == cat %}
+      {% set jug = ins.redag_jugadores or {} %}
+      <div class="jug-card" style="margin-bottom:6px">
+        <div class="jug-avatar">
+          {% if jug.foto_url %}
+          <img src="{{jug.foto_url}}" alt="">
+          {% else %}
+          {{(jug.nombres or 'J')[0]}}{{(jug.apellidos or 'J')[0]}}
+          {% endif %}
+        </div>
+        <div class="jug-info">
+          <div class="jug-name">{{jug.nombres or '—'}} {{jug.apellidos or ''}}</div>
+          <div class="jug-meta">
+            {{jug.edad or '—'}} anos
+            {% if jug.ci %} &bull; CI: {{jug.ci}}{% endif %}
+          </div>
+          <span class="inscrito-tag">{{cat}}</span>
+        </div>
+        <div class="jug-actions">
+          <a href="/torneos/{{torneo.id}}/jugador/{{ins.jugador_id}}/cardex"
+             class="btn btn-primary btn-sm">Cardex</a>
+          <a href="/torneos/{{torneo.id}}/jugador/{{ins.jugador_id}}/cardex/pdf"
+             class="btn btn-purple btn-sm">PDF</a>
+          {% if jug.celular %}
+          <a href="javascript:void(0)"
+             onclick="enviarWA('{{jug.celular}}','{{jug.nombres}} {{jug.apellidos}}','{{cat}}','{{torneo.nombre}}')"
+             class="btn btn-wa btn-sm">WA</a>
+          {% endif %}
+          <!-- Cambiar categoria -->
+          <button onclick="openCambiarCat({{ins.jugador_id}},'{{cat}}')"
+                  class="btn btn-warning btn-sm">Cat.</button>
+          <form method="post" action="/torneos/{{torneo.id}}/desinscribir/{{ins.jugador_id}}"
+                onsubmit="return confirm('Quitar a este jugador del torneo?')">
+            <button class="btn btn-danger btn-sm">X</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="panel" style="text-align:center;padding:30px">
+    <p style="color:var(--dim)">No hay jugadores inscritos todavia</p>
+    <button onclick="showTab('buscar')" class="btn btn-primary" style="margin-top:10px">
+      Inscribir jugadores
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- TAB: BUSCAR E INSCRIBIR -->
+<div id="tab-buscar-content" style="display:none">
+  <div class="panel">
+    <div class="panel-title">Buscar y seleccionar jugador</div>
+    <form method="get" class="search-bar" style="margin-bottom:16px">
+      <input name="q" placeholder="Nombre o apellido..." value="{{q}}" autofocus>
+      <button type="submit" class="btn btn-gray">Buscar</button>
+    </form>
+
+    {% if q %}
+      {% if todos %}
+      {% for j in todos %}
+      <div class="jug-card" style="margin-bottom:8px">
+        <div class="jug-avatar">{{j.nombres[0]}}{{j.apellidos[0]}}</div>
+        <div class="jug-info">
+          <div class="jug-name">{{j.nombres}} {{j.apellidos}}</div>
+          <div class="jug-meta">{{j.edad}} anos &bull; {{j.categoria}}</div>
+          {% if j.id in inscritos_ids %}
+          <span class="inscrito-tag">Ya inscrito</span>
+          {% endif %}
+        </div>
+        <div class="jug-actions">
+          {% if j.id not in inscritos_ids %}
+          <button onclick="openInscribir({{j.id}},'{{j.nombres}} {{j.apellidos}}')"
+                  class="btn btn-success btn-sm">+ Inscribir</button>
+          {% else %}
+          <span class="badge badge-az">Inscrito</span>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p style="color:var(--dim);text-align:center;padding:20px">
+        No se encontraron jugadores con "{{q}}"
+      </p>
+      {% endif %}
+    {% else %}
+    <p style="color:var(--dim);font-size:.85rem;text-align:center;padding:20px">
+      Escribe el nombre del jugador para buscarlo
+    </p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal: Inscribir con categoria -->
+<div class="modal-overlay" id="modal-inscribir">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Seleccionar Categoria</h3>
+      <button class="modal-close" onclick="closeModal('modal-inscribir')">&#10005;</button>
+    </div>
+    <form method="post" action="/torneos/{{torneo.id}}/inscribir">
+      <div class="modal-body">
+        <p id="inscribir-nombre" style="font-weight:700;color:var(--am);margin-bottom:14px"></p>
+        <input type="hidden" name="jugador_id" id="inscribir-jid">
+        <div class="form-group">
+          <label>Categoria del Torneo</label>
+          <select name="categoria_torneo" required>
+            {% for c in categorias_torneo %}
+            <option value="{{c}}">{{c}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-gray" onclick="closeModal('modal-inscribir')">Cancelar</button>
+        <button type="submit" class="btn btn-success">Inscribir</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Cambiar categoria -->
+<div class="modal-overlay" id="modal-cambiar-cat">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Cambiar Categoria</h3>
+      <button class="modal-close" onclick="closeModal('modal-cambiar-cat')">&#10005;</button>
+    </div>
+    <form id="form-cambiar-cat" method="post">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nueva Categoria</label>
+          <select name="categoria_torneo" id="cambiar-cat-sel" required>
+            {% for c in categorias_torneo %}
+            <option value="{{c}}">{{c}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-gray" onclick="closeModal('modal-cambiar-cat')">Cancelar</button>
+        <button type="submit" class="btn btn-warning">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+function showTab(tab){
+  document.getElementById('tab-inscritos-content').style.display = tab==='inscritos' ? 'block' : 'none';
+  document.getElementById('tab-buscar-content').style.display   = tab==='buscar'    ? 'block' : 'none';
+  document.getElementById('tab-inscritos').className = tab==='inscritos'
+    ? 'btn btn-primary btn-sm' : 'btn btn-gray btn-sm';
+  document.getElementById('tab-buscar').className = tab==='buscar'
+    ? 'btn btn-primary btn-sm' : 'btn btn-gray btn-sm';
+  document.getElementById('tab-inscritos').style.borderRadius='20px';
+  document.getElementById('tab-buscar').style.borderRadius='20px';
+}
+
+function openInscribir(jid, nombre){
+  document.getElementById('inscribir-jid').value = jid;
+  document.getElementById('inscribir-nombre').textContent = nombre;
+  openModal('modal-inscribir');
+}
+
+function openCambiarCat(jid, catActual){
+  var form = document.getElementById('form-cambiar-cat');
+  form.action = '/torneos/{{torneo.id}}/jugador/'+jid+'/editar';
+  var sel = document.getElementById('cambiar-cat-sel');
+  for(var i=0;i<sel.options.length;i++){
+    if(sel.options[i].value===catActual){ sel.selectedIndex=i; break; }
+  }
+  openModal('modal-cambiar-cat');
+}
+
+function enviarWA(cel, nombre, cat, torneo){
+  var num = '591' + cel.replace(/\D/g,'');
+  var msg = 'Hola ' + nombre + '! Felicitaciones, has sido SELECCIONADO para representar al '
+    + 'PROYECTO REDAG en el ' + torneo + ' en la categoria ' + cat
+    + '. PROYECTO REDAG - MAS QUE UN EQUIPO, UNA FAMILIA';
+  window.open('https://wa.me/' + num + '?text=' + encodeURIComponent(msg), '_blank');
+}
+</script>
+{% endblock %}

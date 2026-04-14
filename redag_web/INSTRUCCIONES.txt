@@ -1,0 +1,68 @@
+# SISTEMA REDAG WEB - Guia de instalacion y despliegue
+# =====================================================
+
+## PASO 1: Crear las tablas en Supabase
+
+1. Ve a supabase.com → tu proyecto "Proyecto redag Project"
+2. Haz clic en "SQL Editor" (icono de codigo en el menu izquierdo)
+3. Copia TODO el contenido del archivo "setup_supabase.sql"
+4. Pegalo en el editor y presiona "Run"
+5. Debe decir "Success" — las tablas quedan creadas
+
+## PASO 2: Subir el logo
+
+1. Pon el archivo "logo.jpg" del Sistema REDAG dentro de la carpeta "static/"
+   (es el mismo logo que ya tienes en el sistema de escritorio)
+
+## PASO 3: Probar en tu PC local
+
+1. Abre una terminal (cmd) en la carpeta redag_web
+2. Ejecuta:
+   pip install flask reportlab Pillow gunicorn
+
+3. Luego ejecuta:
+   python app.py
+
+4. Abre en tu navegador: http://localhost:5000
+5. El sistema debe cargar
+
+## PASO 4: Publicar en Render (gratis, acceso desde celular)
+
+1. Ve a github.com y crea una cuenta gratuita si no tienes
+2. Crea un repositorio nuevo llamado "redag-web"
+3. Sube todos los archivos de esta carpeta al repositorio
+
+4. Ve a render.com y crea cuenta gratuita
+5. New → Web Service → conecta tu repositorio de GitHub
+6. Configura:
+   - Name: redag-web
+   - Runtime: Python 3
+   - Build Command: pip install -r requirements.txt
+   - Start Command: gunicorn app:app --bind 0.0.0.0:$PORT
+7. Haz clic en "Create Web Service"
+8. Render te dara una URL como: https://redag-web.onrender.com
+
+## PASO 5: Usar desde el celular
+
+1. Abre Chrome en tu celular Android
+2. Ve a la URL de Render: https://redag-web.onrender.com
+3. El navegador mostrara una opcion "Agregar a pantalla de inicio"
+4. Acepta — quedara como una app instalada en tu celular
+5. Se sincroniza automaticamente con la PC
+
+## FUNCIONES DISPONIBLES
+
+- Dashboard con estadisticas en tiempo real
+- Jugadores: registrar, editar, eliminar, buscar
+- Pagos: registrar pagos mensuales, ver pendientes
+- Torneos: crear torneos, inscribir jugadores por categoria
+- Categorias: Sub-6, Sub-8, Sub-10, Sub-12, Sub-14, Sub-16, Sub-18, Sub-20
+- Cardex PDF por jugador con logo REDAG
+- Lista PDF por categoria para el profesor
+- Envio por WhatsApp del cardex y mensaje de seleccion
+- Funciona offline (guarda localmente y sincroniza al reconectarse)
+
+## NOTA IMPORTANTE
+
+Las tablas existentes en tu Supabase NO se tocan.
+Las nuevas tablas tienen prefijo "redag_" para no conflictuar.

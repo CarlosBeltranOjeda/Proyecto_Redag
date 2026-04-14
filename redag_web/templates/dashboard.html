@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - REDAG{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:16px;color:var(--am)">Dashboard — {{mes_actual}} {{anio}}</h2>
+
+<div class="cards">
+  <div class="stat-card">
+    <div class="val" style="color:var(--am)">{{stats.total_jugadores}}</div>
+    <div class="lbl">Total Jugadores</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" style="color:#2ecc71">{{stats.nuevos}}</div>
+    <div class="lbl">Nuevos</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" style="color:#5b9bf8">{{stats.antiguos}}</div>
+    <div class="lbl">Antiguos</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" style="color:#2ecc71">{{stats.pagos_mes}}</div>
+    <div class="lbl">Pagaron este mes</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" style="color:var(--rojo)">{{stats.pendientes}}</div>
+    <div class="lbl">Pendientes</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" style="color:var(--naranja)">{{stats.torneos}}</div>
+    <div class="lbl">Torneos</div>
+  </div>
+</div>
+
+{% if stats.pendientes > 0 %}
+<div class="alert alert-warning">
+  &#9888; Hay <strong>{{stats.pendientes}}</strong> jugadores sin pago en {{mes_actual}} {{anio}}.
+  <a href="/pagos" style="color:var(--am);margin-left:8px">Ver pagos →</a>
+</div>
+{% endif %}
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="panel">
+    <div class="panel-title">&#128101; Acciones rapidas</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <a href="/jugadores/nuevo" class="btn btn-primary">+ Nuevo Jugador</a>
+      <a href="/pagos" class="btn btn-success">Registrar Pago</a>
+      <a href="/torneos/nuevo" class="btn btn-warning">+ Nuevo Torneo</a>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">&#127942; Torneos activos</div>
+    {% if stats.torneos > 0 %}
+    <a href="/torneos" class="btn btn-gray" style="width:100%">Ver todos los torneos</a>
+    {% else %}
+    <p style="color:var(--dim);font-size:.85rem">No hay torneos registrados</p>
+    <a href="/torneos/nuevo" class="btn btn-warning" style="margin-top:8px">Crear torneo</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

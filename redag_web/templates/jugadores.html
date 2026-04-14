@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Jugadores - REDAG{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+  <h2 style="color:var(--am)">Jugadores ({{jugadores|length}})</h2>
+  <a href="/jugadores/nuevo" class="btn btn-primary">+ Nuevo Jugador</a>
+</div>
+
+<form method="get" class="search-bar">
+  <input name="q" placeholder="Buscar por nombre o apellido..." value="{{filtro}}">
+  <select name="cat">
+    <option value="Todas" {% if cat=='Todas' %}selected{% endif %}>Todas las categorias</option>
+    {% for c in categorias %}
+    <option value="{{c}}" {% if cat==c %}selected{% endif %}>{{c}}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-gray">Buscar</button>
+</form>
+
+{% if jugadores %}
+  <!-- Vista móvil: tarjetas -->
+  <div id="vista-cards">
+  {% for j in jugadores %}
+  <div class="jug-card">
+    <div class="jug-avatar">
+      {% if j.foto_url %}
+      <img src="{{j.foto_url}}" alt="">
+      {% else %}
+      {{j.nombres[0]}}{{j.apellidos[0]}}
+      {% endif %}
+    </div>
+    <div class="jug-info">
+      <div class="jug-name">{{j.nombres}} {{j.apellidos}}</div>
+      <div class="jug-meta">
+        {{j.edad}} anos &bull; {{j.categoria}} &bull;
+        <span class="{% if j.estado=='Nuevo' %}badge badge-verde{% else %}badge badge-am{% endif %}">
+          {{j.estado}}
+        </span>
+      </div>
+      {% if j.celular %}
+      <div class="jug-meta" style="margin-top:4px">&#128241; {{j.celular}}</div>
+      {% endif %}
+    </div>
+    <div class="jug-actions">
+      <a href="/jugadores/editar/{{j.id}}" class="btn btn-gray btn-sm">Editar</a>
+      <a href="/jugadores/{{j.id}}/historial" class="btn btn-purple btn-sm">Historial</a>
+      {% if j.celular %}
+      <a href="https://wa.me/591{{j.celular}}" target="_blank" class="btn btn-wa btn-sm">WA</a>
+      {% endif %}
+      <form method="post" action="/jugadores/eliminar/{{j.id}}" style="display:inline"
+            onsubmit="return confirm('Eliminar a {{j.nombres}} {{j.apellidos}}?')">
+        <button type="submit" class="btn btn-danger btn-sm">X</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+  </div>
+{% else %}
+  <div class="panel" style="text-align:center;padding:40px">
+    <p style="color:var(--dim);font-size:.95rem">No hay jugadores registrados</p>
+    <a href="/jugadores/nuevo" class="btn btn-primary" style="margin-top:12px">Registrar primer jugador</a>
+  </div>
+{% endif %}
+{% endblock %}

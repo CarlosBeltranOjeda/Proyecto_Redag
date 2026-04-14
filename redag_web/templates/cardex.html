@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Cardex - {{jugador.nombres}}{% endblock %}
+{% block content %}
+<div style="max-width:500px;margin:0 auto">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <a href="/torneos/{{torneo.id}}/jugadores" class="btn btn-gray btn-sm">&#8592;</a>
+    <h2 style="color:var(--am)">Cardex del Jugador</h2>
+  </div>
+
+  <!-- Card visual del cardex -->
+  <div style="background:linear-gradient(135deg,#003399,#0044cc);border-radius:14px;
+              padding:20px;margin-bottom:16px;border:2px solid var(--am)">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      {% if jugador.foto_url %}
+      <img src="{{jugador.foto_url}}" style="width:64px;height:64px;border-radius:50%;
+           object-fit:cover;border:3px solid var(--am)">
+      {% else %}
+      <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,215,0,.2);
+                  display:flex;align-items:center;justify-content:center;
+                  font-size:1.6rem;font-weight:700;color:var(--am);border:3px solid var(--am)">
+        {{jugador.nombres[0]}}{{jugador.apellidos[0]}}
+      </div>
+      {% endif %}
+      <div>
+        <div style="font-weight:700;font-size:1.1rem;color:#fff">
+          {{jugador.nombres}} {{jugador.apellidos}}
+        </div>
+        <div style="color:var(--am);font-size:.85rem">
+          REDAG-{{"%04d"|format(jugador.id)}}
+        </div>
+        <span class="badge badge-am" style="margin-top:4px">{{insc.categoria_torneo or '—'}}</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.82rem">
+      <div>
+        <span style="color:#aab4c8">Edad:</span>
+        <span style="color:#fff;margin-left:4px">{{jugador.edad}} anos</span>
+      </div>
+      <div>
+        <span style="color:#aab4c8">C.I.:</span>
+        <span style="color:#fff;margin-left:4px">{{jugador.ci or '—'}}</span>
+      </div>
+      <div>
+        <span style="color:#aab4c8">Torneo:</span>
+        <span style="color:#fff;margin-left:4px;font-size:.78rem">{{torneo.nombre}}</span>
+      </div>
+      <div>
+        <span style="color:#aab4c8">Inscrito:</span>
+        <span style="color:#fff;margin-left:4px">{{insc.fecha_inscripcion or '—'}}</span>
+      </div>
+    </div>
+    <div style="margin-top:12px;text-align:center;font-size:.78rem;color:var(--am);font-style:italic">
+      PROYECTO REDAG - MAS QUE UN EQUIPO, UNA FAMILIA
+    </div>
+  </div>
+
+  <!-- Acciones -->
+  <div class="btn-group" style="justify-content:center;margin-bottom:16px">
+    <a href="/torneos/{{torneo.id}}/jugador/{{jugador.id}}/cardex/pdf"
+       class="btn btn-primary">&#128247; Descargar PDF</a>
+    {% if jugador.celular %}
+    <button onclick="enviarCardexWA()" class="btn btn-wa">
+      &#128172; Enviar por WhatsApp
+    </button>
+    {% endif %}
+    <a href="/jugadores/editar/{{jugador.id}}" class="btn btn-gray">Editar datos</a>
+  </div>
+
+  {% if not jugador.ci %}
+  <div class="alert alert-warning">
+    &#9888; Este jugador no tiene Carnet de Identidad registrado.
+    <a href="/jugadores/editar/{{jugador.id}}" style="color:var(--am)">Agregar →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function enviarCardexWA(){
+  var cel = '591{{jugador.celular}}'.replace(/\D/g,'');
+  var pdfUrl = window.location.origin + '/torneos/{{torneo.id}}/jugador/{{jugador.id}}/cardex/pdf';
+  var msg = 'Hola {{jugador.nombres}}! Felicitaciones, has sido SELECCIONADO para representar al '
+    + 'PROYECTO REDAG en el {{torneo.nombre}} en la categoria {{insc.categoria_torneo or ""}}. '
+    + 'Descarga tu cardex de seleccion en: ' + pdfUrl
+    + ' - PROYECTO REDAG, MAS QUE UN EQUIPO, UNA FAMILIA';
+  window.open('https://wa.me/' + cel + '?text=' + encodeURIComponent(msg), '_blank');
+}
+</script>
+{% endblock %}

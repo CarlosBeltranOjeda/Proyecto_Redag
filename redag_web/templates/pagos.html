@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Pagos - REDAG{% endblock %}
+{% block content %}
+<h2 style="color:var(--am);margin-bottom:14px">Pagos</h2>
+
+<!-- Filtros -->
+<form method="get" class="search-bar">
+  <select name="mes">
+    {% for m in meses %}
+    <option value="{{m}}" {% if mes==m %}selected{% endif %}>{{m}}</option>
+    {% endfor %}
+  </select>
+  <input name="anio" type="number" value="{{anio}}" style="width:80px">
+  <select name="cat">
+    <option value="Todas" {% if cat=='Todas' %}selected{% endif %}>Todas</option>
+    {% for c in categorias %}
+    <option value="{{c}}" {% if cat==c %}selected{% endif %}>{{c}}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-gray">Ver</button>
+</form>
+
+<!-- Resumen -->
+<div class="cards" style="margin-bottom:14px">
+  <div class="stat-card">
+    <div class="val" style="color:var(--am)">Bs. {{total_mat|int}}</div>
+    <div class="lbl">Matriculas</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" style="color:#2ecc71">Bs. {{total_men|int}}</div>
+    <div class="lbl">Mensualidades</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" style="color:var(--rojo)">{{pendientes}}</div>
+    <div class="lbl">Pendientes</div>
+  </div>
+</div>
+
+<!-- Lista jugadores -->
+{% for j in jugadores %}
+{% set pago = pagos | selectattr('jugador_id','equalto',j.id) | list | first %}
+<div class="jug-card" style="margin-bottom:8px">
+  <div class="jug-avatar" style="{% if j.id in pagados_ids %}background:var(--verde){% else %}background:var(--rojo){% endif %}">
+    {{j.nombres[0]}}{{j.apellidos[0]}}
+  </div>
+  <div class="jug-info">
+    <div class="jug-name">{{j.nombres}} {{j.apellidos}}</div>
+    <div class="jug-meta">{{j.categoria}} &bull; {{j.estado}}</div>
+    {% if j.id in pagados_ids %}
+      <span class="chip-pag">Pagado — {{mes}}</span>
+    {% else %}
+      <span class="chip-pend">Pendiente — {{mes}}</span>
+    {% endif %}
+  </div>
+  <div class="jug-actions">
+    {% if j.id not in pagados_ids %}
+    <button onclick="openPago({{j.id}},'{{j.nombres}} {{j.apellidos}}','{{j.estado}}')"
+            class="btn btn-success btn-sm">Registrar Pago</button>
+    {% else %}
+    <button onclick="openPago({{j.id}},'{{j.nombres}} {{j.apellidos}}','{{j.estado}}')"
+            class="btn btn-gray btn-sm">Ver/Editar</button>
+    {% if pago %}
+    <form method="post" action="/pagos/eliminar/{{pago.id}}"
+          onsubmit="return confirm('Eliminar pago?')">
+      <input type="hidden" name="mes" value="{{mes}}">
+      <input type="hidden" name="anio" value="{{anio}}">
+      <button class="btn btn-danger btn-sm">X</button>
+    </form>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+
+<!-- Modal Pago -->
+<div class="modal-overlay" id="modal-pago">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Registrar Pago</h3>
+      <button class="modal-close" onclick="closeModal('modal-pago')">&#10005;</button>
+    </div>
+    <form method="post" action="/pagos/registrar">
+      <div class="modal-body">
+        <p id="pago-nombre" style="font-weight:700;margin-bottom:14px;color:var(--am)"></p>
+        <input type="hidden" name="jugador_id" id="pago-jid">
+        <input type="hidden" name="mes" value="{{mes}}">
+        <input type="hidden" name="anio" value="{{anio}}">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Matricula (Bs.)</label>
+            <input name="matricula" id="pago-mat" type="number" step="0.01" value="100">
+          </div>
+          <div class="form-group">
+            <label>Dia de pago</label>
+            <input name="dia_pago" type="number" min="1" max="31" value="1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Mensualidad (Bs.)</label>
+          <input name="mensualidad" type="number" step="0.01" value="100" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-gray" onclick="closeModal('modal-pago')">Cancelar</button>
+        <button type="submit" class="btn btn-success">Guardar Pago</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+function openPago(jid, nombre, estado){
+  document.getElementById('pago-jid').value=jid;
+  document.getElementById('pago-nombre').textContent=nombre;
+  document.getElementById('pago-mat').value = estado==='Nuevo' ? 100 : 0;
+  openModal('modal-pago');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{
+  "name": "Sistema REDAG",
+  "short_name": "REDAG",
+  "description": "Gestion Escuela Futbol de Salon REDAG",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#1e2128",
+  "theme_color": "#003399",
+  "orientation": "portrait-primary",
+  "icons": [
+    {"src": "/static/logo.jpg", "sizes": "192x192", "type": "image/jpeg"},
+    {"src": "/static/logo.jpg", "sizes": "512x512", "type": "image/jpeg"}
+  ]
+}

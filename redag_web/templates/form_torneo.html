@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{titulo}} - REDAG{% endblock %}
+{% block content %}
+<div style="max-width:500px;margin:0 auto">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+    <a href="/torneos" class="btn btn-gray btn-sm">&#8592;</a>
+    <h2 style="color:var(--am)">{{titulo}}</h2>
+  </div>
+  <div class="panel">
+    <form method="post">
+      <div class="form-group">
+        <label>Nombre del Torneo *</label>
+        <input name="nombre" required placeholder="ej: Torneo Asociacion Futsal El Alto 2026"
+               value="{{torneo.nombre if torneo else ''}}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha de inicio</label>
+          <input name="fecha_inicio" type="date" value="{{torneo.fecha_inicio if torneo else ''}}">
+        </div>
+        <div class="form-group">
+          <label>Fecha fin</label>
+          <input name="fecha_fin" type="date" value="{{torneo.fecha_fin if torneo else ''}}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Sede / Lugar</label>
+        <input name="sede" placeholder="ej: Coliseo El Alto" value="{{torneo.sede if torneo else ''}}">
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select name="estado">
+          {% for est in ['Planificado','En curso','Finalizado','Cancelado'] %}
+          <option value="{{est}}" {% if torneo and torneo.estado==est %}selected{% endif %}>{{est}}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Descripcion</label>
+        <textarea name="descripcion" rows="3" placeholder="Detalles del torneo...">{{torneo.descripcion if torneo else ''}}</textarea>
+      </div>
+      <div class="form-actions">
+        <a href="/torneos" class="btn btn-gray">Cancelar</a>
+        <button type="submit" class="btn btn-warning">
+          {% if torneo %}Guardar Cambios{% else %}Crear Torneo{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

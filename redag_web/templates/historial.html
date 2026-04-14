@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Historial - {{jugador.nombres}}{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+    <a href="/jugadores" class="btn btn-gray btn-sm">&#8592;</a>
+    <h2 style="color:var(--am)">Historial de Pagos</h2>
+  </div>
+
+  <div class="panel" style="margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--az);
+                  display:flex;align-items:center;justify-content:center;
+                  font-weight:700;color:var(--am);font-size:1.1rem">
+        {{jugador.nombres[0]}}{{jugador.apellidos[0]}}
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:1rem">{{jugador.nombres}} {{jugador.apellidos}}</div>
+        <div style="font-size:.8rem;color:var(--dim)">
+          {{jugador.categoria}} &bull; {{jugador.estado}} &bull; {{jugador.edad}} anos
+        </div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:.75rem;color:var(--dim)">Total pagado</div>
+        <div style="font-weight:700;color:var(--am);font-size:1.1rem">Bs. {{total|round(2)}}</div>
+      </div>
+    </div>
+  </div>
+
+  {% if pagos %}
+  <div class="tabla-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Mes</th><th>Año</th><th>Matricula</th><th>Mensualidad</th><th>Total</th><th>Fecha Pago</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pagos %}
+        <tr>
+          <td>{{p.mes}}</td>
+          <td>{{p.anio}}</td>
+          <td>Bs. {{p.matricula|int}}</td>
+          <td>Bs. {{p.mensualidad|round(2)}}</td>
+          <td style="font-weight:600;color:var(--am)">Bs. {{(p.matricula+p.mensualidad)|round(2)}}</td>
+          <td>{{p.fecha_pago or '—'}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="panel" style="text-align:center;padding:30px">
+    <p style="color:var(--dim)">No hay pagos registrados para este jugador</p>
+    <a href="/pagos" class="btn btn-success" style="margin-top:10px">Registrar pago</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
